@@ -3,52 +3,44 @@ import { products } from "@/lib/db/schema";
 import { ProductSchema } from "@/lib/validators/productSchema";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import dotenv from "dotenv";
-dotenv.config();
-
+import { Buffer } from 'buffer';
+import dotenv from "dotenv"
+dotenv.config()
 
 export async function POST(req: Request) {
     const formData = await req.formData();
     
-    // Convert the image to Blob explicitly since File might not be available in Node.js environment
-   // ... existing code ...
-  // ... existing code ...
-  const imageFile = formData.get("image");
-  if (!imageFile) {
-      return Response.json({ message: "No image provided" }, { status: 400 });
-  }
-  const imageBlob = new Blob([imageFile], { type: (imageFile as any).type || 'image/png' });
-// ... existing code ...
-// ... existing code ...
+    const imageFile = formData.get("image");
+    if (!imageFile) {
+        return Response.json({ message: "No image provided" }, { status: 400 });
+    }
+
+    // Convert the image data directly to buffer
+    const imageBuffer = Buffer.from(await (imageFile as any).arrayBuffer());
+
     let validData;
     try {
         validData = await ProductSchema.parse({
             name: formData.get("name"),
             description: formData.get("description"),
             price: formData.get("price"),
-            image: imageBlob
+            image: imageFile
         });
     } catch (error) {
         return Response.json(error, { status: 400 });
     }
 
-    // 🔹 Extract the extension safely
-    const extension = validData.image.type.split("/")[1] || "png"; // Default to png if missing
-    const fileName = `${Date.now()}.${extension}`;
+    // Use a default extension
+    const fileName = `${Date.now()}.png`;
 
     try {
-        // 🔹 Convert Blob to Buffer
-        const arrayBuffer = await validData.image.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        // 🔹 Ensure `public/assets/` directory exists
         const filePath = path.join(process.cwd(), "public/assets", fileName);
-        await writeFile(filePath, buffer);
-
+        await writeFile(filePath, imageBuffer);
     } catch (error) {
         return Response.json({ message: "Failed to store image in file system" }, { status: 500 });
     }
 
+    // ... rest of the code remains the same ...
     try {
         const product = await db.insert(products).values({
             ...validData,
