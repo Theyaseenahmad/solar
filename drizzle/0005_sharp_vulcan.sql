@@ -1,0 +1,1 @@
+ALTER TABLE "inventories" ADD CONSTRAINT "inventories_SKU_unique" UNIQUE("SKU");
