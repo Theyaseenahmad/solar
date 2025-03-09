@@ -3,14 +3,22 @@ import { products } from "@/lib/db/schema";
 import { ProductSchema } from "@/lib/validators/productSchema";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import dotenv from "dotenv";
+dotenv.config();
+
 
 export async function POST(req: Request) {
     const formData = await req.formData();
     
     // Convert the image to Blob explicitly since File might not be available in Node.js environment
    // ... existing code ...
-   const imageFile = formData.get("image") as File;
-   const imageBlob = new Blob([imageFile], { type: imageFile.type });
+  // ... existing code ...
+  const imageFile = formData.get("image");
+  if (!imageFile) {
+      return Response.json({ message: "No image provided" }, { status: 400 });
+  }
+  const imageBlob = new Blob([imageFile], { type: (imageFile as any).type || 'image/png' });
+// ... existing code ...
 // ... existing code ...
     let validData;
     try {
