@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-     "build": "next build",
-      "start": "next start -p $PORT",
+    "build": "next build",
+    "start": "next start",
     "lint": "next lint",
     "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
     "db:run": "node -r esbuild-register ./migrate.ts"

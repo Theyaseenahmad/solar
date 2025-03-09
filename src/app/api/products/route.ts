@@ -6,14 +6,19 @@ import path from "node:path";
 
 export async function POST(req: Request) {
     const formData = await req.formData();
-
+    
+    // Convert the image to Blob explicitly since File might not be available in Node.js environment
+   // ... existing code ...
+   const imageFile = formData.get("image") as File;
+   const imageBlob = new Blob([imageFile], { type: imageFile.type });
+// ... existing code ...
     let validData;
     try {
         validData = await ProductSchema.parse({
             name: formData.get("name"),
             description: formData.get("description"),
             price: formData.get("price"),
-            image: formData.get("image") // This is a Blob, not a File
+            image: imageBlob
         });
     } catch (error) {
         return Response.json(error, { status: 400 });
@@ -49,15 +54,13 @@ export async function POST(req: Request) {
 }
 
 export async function GET(){
-try {
-    console.log('env',process.env.DATABASE_URI);
-    
-    const allProducts = await db.select().from(products)
-    return Response.json(allProducts);
-} catch (error) {
-    console.log(error);
-    return Response.json({message:"failed to fetch products",error},{ status: 500 });
-    
-    
-}
+    try {
+        console.log('env',process.env.DATABASE_URI);
+        
+        const allProducts = await db.select().from(products)
+        return Response.json(allProducts);
+    } catch (error) {
+        console.log(error);
+        return Response.json({message:"failed to fetch products",error},{ status: 500 });
+    }
 }
